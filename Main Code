@@ -1,0 +1,50 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Step 1: Load the dataset
+uploaded_dataset_path = '/content/Wellbeing_and_lifestyle_data_.csv'
+new_data = pd.read_csv(uploaded_dataset_path)
+
+# Display the first few rows to verify the dataset
+print("Dataset Preview:")
+print(new_data.head())
+
+# Step 2: Data Preprocessing
+# Convert categorical columns (e.g., AGE, GENDER) to numeric codes
+new_data['AGE'] = new_data['AGE'].astype('category').cat.codes
+new_data['GENDER'] = new_data['GENDER'].astype('category').cat.codes
+
+# Handle missing values
+# Separate numeric and non-numeric columns
+numeric_cols = new_data.select_dtypes(include=['float64', 'int64']).columns
+non_numeric_cols = new_data.select_dtypes(exclude=['float64', 'int64']).columns
+
+# Fill missing values in numeric columns with the median
+new_data[numeric_cols] = new_data[numeric_cols].fillna(new_data[numeric_cols].median())
+
+# Fill missing values in non-numeric columns with the mode (most frequent value)
+for col in non_numeric_cols:
+    new_data[col].fillna(new_data[col].mode()[0], inplace=True)
+
+# Step 3: Visualization - Weekly Meditation and Stress Levels
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='WEEKLY_MEDITATION', y='DAILY_STRESS', data=new_data)
+plt.title('Impact of Weekly Meditation on Daily Stress Levels (Dataset: Wellbeing and Lifestyle)')
+plt.xlabel('Weekly Meditation Frequency')
+plt.ylabel('Daily Stress Level')
+plt.show()
+
+# Step 4: Visualization - Sleep Hours vs. Work-Life Balance Score
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='SLEEP_HOURS', y='WORK_LIFE_BALANCE_SCORE', hue='GENDER', data=new_data)
+plt.title('Sleep Hours vs. Work-Life Balance Score (Dataset: Wellbeing and Lifestyle)')
+plt.xlabel('Sleep Hours')
+plt.ylabel('Work-Life Balance Score')
+plt.legend(title='Gender')
+plt.show()
+
+# Step 5: Summary Statistics for Key Metrics
+print("\nSummary Statistics:")
+print(new_data[['DAILY_STRESS', 'WEEKLY_MEDITATION', 'SLEEP_HOURS', 'WORK_LIFE_BALANCE_SCORE']].describe())
+
